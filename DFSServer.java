@@ -36,7 +36,7 @@ public class DFSServer {
                 if (line == null)
                     return;
                 String[] parts = line.split(" ", 3);
-                String command = parts[0];
+                String command = parts[0]; //FETCH or STORE
 
                 if ("FETCH".equals(command)) {
                     String path = parts[1];
@@ -65,6 +65,26 @@ public class DFSServer {
                     fileStore.put(path, content.toString().trim());
                     writeLocks.remove(path); // 更新後にロック解除
                     out.println("SUCCESS");
+                } else if("UNLOCK".equals(command)) {
+                    String path = parts[1];
+                    writeLocks.remove(path); // ロックを解除
+                    out.println("SUCCESS");
+                } else if ("-ls".equals(command)) {
+                    out.println("FILES_LIST_START");
+                    for (String filePath : fileStore.keySet()) {
+                        out.println(filePath);
+                    }
+                    out.println("FILES_LIST_END");
+
+                } else if("VIEW_LOCKS".equals(command)) {
+                    out.println("LOCKS_LIST_START");
+                    for (Map.Entry<String, String> entry : writeLocks.entrySet()) {
+                        out.println("File: " + entry.getKey() + " locked by " + entry.getValue());
+                    }
+                    out.println("LOCKS_LIST_END");
+                
+                }else {
+                    out.println("ERROR: Unknown command");
                 }
             } catch (IOException e) {
                 e.printStackTrace();
